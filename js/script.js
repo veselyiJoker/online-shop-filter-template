@@ -588,7 +588,6 @@ const renderFavorites = (catalogFavoriteItems) => {
             ещё раз на «Показать избранные».
         `;
     } else {
-        console.log(catalogFavoriteItems);
         renderCatalog(catalogFavoriteItems);
     }
 }
