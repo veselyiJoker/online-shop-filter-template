@@ -1,0 +1,22 @@
+.rs-container{
+    margin-top: 50px;
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+.rs-container .rs-selected {
+    color: var(--white);
+    background-color: var(--main-blue);
+    border-color: var(--main-blue);
+}
+
+.rs-container .rs-scale {
+    display: none;
+}
+
+.rs-tooltip {
+    position: absolute;
+    color: var(--white);
+    background-color: var(--main-blue);
+    border-color: var(--main-blue);
+}
