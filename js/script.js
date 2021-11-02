@@ -277,11 +277,11 @@ const generateCatalogItem = (catalogItemData) => {
 };
 
 
-const renderCatalog = (renderCatalogData, itemsCount = CATALOG_PAGE_ITEMS_COUNT) => {
+const renderCatalog = (catalogData, itemsCount = CATALOG_PAGE_ITEMS_COUNT) => {
     clearDOMItem(catalog);
 
     const fragment = document.createDocumentFragment();
-    const catalogPagesData = [...renderCatalogData].slice(0, itemsCount);
+    const catalogPagesData = [...catalogData].slice(0, itemsCount);
 
     catalogPagesData.forEach(elem => {
         fragment.appendChild(generateCatalogItem(elem));
@@ -310,7 +310,6 @@ const onCatalogItemFavoriteBtnClick = (e) => {
         e.preventDefault();
         const catalogItemId = Number(e.target.closest('.product').dataset.id);
         const catalogItemData = catalogData.find(elem => elem.id === catalogItemId);
-
         if (!catalogItemData.favorite) {
             e.target.closest('.product__favourite.fav-add').classList.add('fav-add--checked');
             addFavoriteItem(catalogItemData);
@@ -328,9 +327,7 @@ const onCatalogItemClick = (e) => {
         const catalogItemId = Number(e.target.closest('.product').dataset.id);
         const catalogItemData = catalogData.find(elem => elem.id === catalogItemId)
         // popup && renderPopup && showPopup is below ↓ ↓ ↓
-        if (catalogItemId !== Number(popup.dataset.productId)) {
-            renderPopup(catalogItemData);
-        }
+        renderPopup(catalogItemData);
         showPopup();
     }
 }
@@ -410,7 +407,6 @@ const generateCharsItem = (charsName, charsValue) => {
 
 
 const renderPopup = (catalogItemData) => {
- 
     popup.setAttribute('data-product-id', catalogItemData.id);
 
     popupDate.textContent = transformToDate(catalogItemData.publicationDate);
