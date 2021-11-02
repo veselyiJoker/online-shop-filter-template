@@ -27,8 +27,7 @@ const MAX_DAYS_AGO_MILLISECONDS = MILLISECONDS_IN_DAY * 5;
 const LOCAL_STORAGE_FAVORITE_ITEMS = 'favoriteItems';
 
 const catalogData = [];
-const catalogFavoriteItems = [];
-if (JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))) catalogFavoriteItems.push(...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)));
+const catalogFavoriteItems = JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)) ? [...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))] : [];
 
 const titlesData = [
     'Загородный дом с видом на озеро',
