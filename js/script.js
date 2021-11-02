@@ -28,7 +28,7 @@ const LOCAL_STORAGE_FAVORITE_ITEMS = 'favoriteItems';
 
 const catalogData = [];
 const catalogFavoriteItems = [];
-if (JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))) catalogFavoriteItems.push(...localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS));
+if (JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))) catalogFavoriteItems.push(...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)));
 
 const titlesData = [
     'Загородный дом с видом на озеро',
@@ -588,6 +588,7 @@ const renderFavorites = (catalogFavoriteItems) => {
             ещё раз на «Показать избранные».
         `;
     } else {
+        console.log(catalogFavoriteItems);
         renderCatalog(catalogFavoriteItems);
     }
 }
