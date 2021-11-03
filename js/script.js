@@ -15,13 +15,13 @@ const MIN_BUILD_NUMBER = 1;
 const MAX_BUILD_NUMBER = 100;
 
 const MIN_REALTY_AREA = 30;
-const MAX_REALTY_AREA = 300;
+const MAX_REALTY_AREA = 250;
 
-const MIN_ROOMS_COUNT = 1;
-const MAX_ROOMS_COUNT = 10;
+const MIN_COUNT_ROOMS = 1;
+const MAX_COUNT_ROOMS = 10;
 
-const MIN_PHOTOS_COUNT = 1;
-const MAX_PHOTOS_COUNT = 4;
+const MIN_COUNT_PHOTOS = 1;
+const MAX_COUNT_PHOTOS= 4;
 
 const DATE_NOW = Date.now();
 const MILLISECONDS_IN_DAY = 86400000;
@@ -47,26 +47,6 @@ const descriptionsData = [
     'Уютная однушка в тихом спальном районе. Рядом лес и озёра.',
     'Деревянный дом на берегу озера. На первом этаже кухня-гостиная, на втором этаже спальня. Идеально для пары без детей. В доме много окон, поэтому много света. Дизайнерская мебель входит в стоимость дома.'
 ];
-
-const categoriesData = {
-    realty: {
-        house: {
-            type: 'Дом',
-            roomsCount: MIN_ROOMS_COUNT,
-            area: MIN_REALTY_AREA,
-        },
-        apartments: {
-            type: 'Апартаменты',
-            roomsCount: MIN_ROOMS_COUNT,
-            area: MIN_REALTY_AREA,
-        },
-        flat: {
-            type: 'Квартира',
-            roomsCount: MIN_ROOMS_COUNT,
-            area: MIN_REALTY_AREA,
-        },
-    }
-};
 
 const sellersNamesData = [
     'Бюро Семёна',
@@ -137,6 +117,11 @@ const photosData = [
     },
 ];
 
+const typesData = [
+    "house",
+    "apartment",
+    "flat"
+];
 
 const monthsList = [
     'Января',
@@ -153,9 +138,10 @@ const monthsList = [
     'Декабря'
 ];
 
-const catalogFavoriteItems = JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)) ? [...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))] : [];
+const catalogFavoritesData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)) ? [...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))] : [];
 
 let showFavorites;
+
 
 
 
@@ -165,25 +151,24 @@ const getRandomInteger = (min, max) => {
 };
 
 
-const transformToDate = (publicationDate) => {
-    const dateDifference = DATE_NOW - publicationDate;
+const transformToDate = (publishDate) => {
+    const dateDifference = DATE_NOW - publishDate;
 
     if (dateDifference <= MILLISECONDS_IN_DAY) {
         return 'Сегодня';
     } else if (dateDifference <= MILLISECONDS_IN_DAY * 2) {
         return 'Вчера';
     } else {
-        const resultDate = new Date(publicationDate);
+        const resultDate = new Date(publishDate);
         return `${resultDate.getDate()} ${monthsList[resultDate.getUTCMonth()]} ${resultDate.getFullYear()}`;
     }
 }
 
 
 const generatePhotosArray = (photosData, photosCount) => {
-    let photosArray = [...photosData];
-    let newPhotosArray = [];
+    const newPhotosArray = [];
     for (let i = 0; i < photosCount; i++) {
-        newPhotosArray.push( ...photosArray.splice(getRandomInteger(0, photosArray.length - 1),1) );
+        newPhotosArray.push( photosData[getRandomInteger(0, photosData.length - 1)] );
     }
     return newPhotosArray;
 };
@@ -191,24 +176,14 @@ const generatePhotosArray = (photosData, photosCount) => {
 
 const generateCatalogData = (itemsCount = ITEMS_COUNT) => {
     const newCatalogData = [];
-    for (let i = 0; i < itemsCount; i++) {
-        const categoryName = Object.keys(categoriesData)[getRandomInteger(0, Object.keys(categoriesData).length - 1)];
-        const info = {
-            type: categoriesData[categoryName][Object.keys(categoriesData[categoryName])[getRandomInteger(0, Object.keys(categoriesData[categoryName]).length - 1)]].type,
-            area: getRandomInteger(MIN_REALTY_AREA, MAX_REALTY_AREA),
-            roomsCount: getRandomInteger(MIN_ROOMS_COUNT, MAX_ROOMS_COUNT),
-        }
-        
+    for (let i = 0; i < itemsCount; i++) {        
         newCatalogData.push({
             id: i,
             title: titlesData[getRandomInteger(0, titlesData.length - 1)],
             description: descriptionsData[getRandomInteger(0, descriptionsData.length - 1)],
             price: getRandomInteger(MIN_PRICE, MAX_PRICE),
-            publicationDate: DATE_NOW - getRandomInteger(0, MAX_DAYS_AGO_MILLISECONDS),
-            category: {
-                categoryName: categoryName,
-                info: info,
-            },
+            publishDate: DATE_NOW - getRandomInteger(0, MAX_DAYS_AGO_MILLISECONDS),
+            category: 'Недвижимость',
             seller: {
                 name: sellersNamesData[getRandomInteger(0, sellersNamesData.length - 1)],
                 rating: getRandomInteger(MIN_SELLER_RATE * 10, MAX_SELLER_RATE * 10) / 10,
@@ -218,8 +193,13 @@ const generateCatalogData = (itemsCount = ITEMS_COUNT) => {
                 street: streetsData[getRandomInteger(0, streetsData.length - 1)], 
                 building: getRandomInteger(MIN_BUILD_NUMBER, MAX_BUILD_NUMBER),
             },
-            photos: generatePhotosArray(photosData, getRandomInteger(MIN_PHOTOS_COUNT, MAX_PHOTOS_COUNT)),
-            favorite: catalogFavoriteItems.find(elem => elem.id === i) ? true : false,
+            photos: generatePhotosArray(photosData, getRandomInteger(MIN_COUNT_PHOTOS, MAX_COUNT_PHOTOS)),
+            filtres: {
+                type: typesData[getRandomInteger(0, typesData.length - 1)],
+                area: getRandomInteger(MIN_REALTY_AREA, MAX_REALTY_AREA),
+                roomsCount: getRandomInteger(MIN_COUNT_ROOMS, MAX_COUNT_ROOMS),
+            },
+            favorite: catalogFavoritesData.find(elem => elem.id === i) ? true : false,
         });
     }
     return newCatalogData;
@@ -230,8 +210,8 @@ catalogData.push(...generateCatalogData());
 
 
 
-const catalog = document.querySelector('.results__list');
 
+const catalog = document.querySelector('.results__list');
 
 const clearDOMItem = (item) => {
     item.innerHTML = '';
@@ -277,7 +257,7 @@ const generateCatalogItem = (catalogItemData) => {
                 ${catalogItemData.location.city ? catalogItemData.location.city : 'Город не найден'},
                 ${catalogItemData.location.street ? catalogItemData.location.street : 'ул. ненайдена'}
             </div>
-            <div class="product__date">${transformToDate(catalogItemData.publicationDate)}</div>
+            <div class="product__date">${transformToDate(catalogItemData.publishDate)}</div>
             </div>
         </li>
     `;
@@ -301,15 +281,15 @@ const renderCatalog = (catalogData, itemsCount = CATALOG_PAGE_ITEMS_COUNT) => {
 
 const addFavoriteItem = (catalogItemData) => {
     catalogItemData.favorite = true;
-    catalogFavoriteItems.push(catalogItemData);
-    localStorage.setItem(LOCAL_STORAGE_FAVORITE_ITEMS, JSON.stringify(catalogFavoriteItems));
+    catalogFavoritesData.push(catalogItemData);
+    localStorage.setItem(LOCAL_STORAGE_FAVORITE_ITEMS, JSON.stringify(catalogFavoritesData));
 }
 
 
 const removeFavoriteItem = (catalogItemData) => {
     catalogItemData.favorite = false;
-    catalogFavoriteItems.splice(catalogFavoriteItems.findIndex(elem => elem.id === catalogItemData.id),1);
-    localStorage.setItem(LOCAL_STORAGE_FAVORITE_ITEMS, JSON.stringify(catalogFavoriteItems));
+    catalogFavoritesData.splice(catalogFavoritesData.findIndex(elem => elem.id === catalogItemData.id),1);
+    localStorage.setItem(LOCAL_STORAGE_FAVORITE_ITEMS, JSON.stringify(catalogFavoritesData));
 }
 
 
@@ -339,7 +319,7 @@ const onCatalogItemClick = (e) => {
 
         // renderPopup && showPopup is below ↓ ↓ ↓
         if (showFavorites) {
-            renderPopup(catalogFavoriteItems.find(elem => elem.id === catalogItemId));
+            renderPopup(catalogFavoritesData.find(elem => elem.id === catalogItemId));
         } else {
             renderPopup(catalogData.find(elem => elem.id === catalogItemId));
         }
@@ -358,6 +338,7 @@ const onCatalogClick = (e) => {
 
 renderCatalog(catalogData);
 catalog.addEventListener('click', onCatalogClick);
+
 
 
 
@@ -400,7 +381,12 @@ const generateGalleryList = (photos) => {
 
 const onPopupGaleryClick = (e) => {
     if (e.target.closest('.gallery__item')) {
-        popupGalleryMainImg.src = catalogData[e.target.closest('.popup').dataset.productId].photos[e.target.closest('.gallery__item img').dataset.id].link;
+
+        if (showFavorites) {
+            popupGalleryMainImg.src = catalogFavoritesData[e.target.closest('.popup').dataset.productId].photos[e.target.closest('.gallery__item img').dataset.id].link;
+        } else {
+            popupGalleryMainImg.src = catalogData[e.target.closest('.popup').dataset.productId].photos[e.target.closest('.gallery__item img').dataset.id].link;
+        }
     
         popupGalleryItems.forEach(elem => {
             elem.classList.remove('gallery__item--active');
@@ -424,7 +410,7 @@ const generateCharsItem = (charsName, charsValue) => {
 const renderPopup = (catalogItemData) => {
     popup.setAttribute('data-product-id', catalogItemData.id);
 
-    popupDate.textContent = transformToDate(catalogItemData.publicationDate);
+    popupDate.textContent = transformToDate(catalogItemData.publishDate);
 
     popupTitle.textContent = catalogItemData.title;
 
@@ -439,9 +425,9 @@ const renderPopup = (catalogItemData) => {
     popupGalleryItems = popup.querySelectorAll('.gallery__item');
 
     clearDOMItem(popupChars);
-    popupChars.appendChild(generateCharsItem('Площадь', catalogItemData.category.info.area));
-    popupChars.appendChild(generateCharsItem('Количество комнат', catalogItemData.category.info.roomsCount));
-    popupChars.appendChild(generateCharsItem('Тип недвижимости', catalogItemData.category.info.type));
+    popupChars.appendChild(generateCharsItem('Площадь', catalogItemData.filtres.area));
+    popupChars.appendChild(generateCharsItem('Количество комнат', catalogItemData.filtres.roomsCount));
+    popupChars.appendChild(generateCharsItem('Тип недвижимости', catalogItemData.filtres.type));
 
     popupSellerName.textContent = catalogItemData.seller.name;
     popupSellerRating.textContent = catalogItemData.seller.rating;
@@ -532,12 +518,13 @@ const onPopupFavoriteBtnClick = (e) => {
 
 
 
-const catalogDataSorted = [...catalogData];
+const catalogDataFiltred = [...catalogData];
+const catalogDataSorted = [...catalogDataFiltred];
 const sortBtns = document.querySelectorAll('.sorting__order-tab input[name=sorting-order]');
 
-const sort = (type, catalogData) => {
 
-    catalogDataSorted.splice(0, catalogDataSorted.length - 1, ...catalogData);
+const sort = (type) => {
+    catalogDataSorted.splice(0, catalogDataSorted.length, ...catalogDataFiltred);
 
     switch (type) {
       case 'popular':
@@ -547,17 +534,17 @@ const sort = (type, catalogData) => {
         return catalogDataSorted.sort((activeItem, nextItem) => activeItem.price - nextItem.price);
 
       case 'new':
-        return catalogDataSorted.sort((activeItem, nextItem) => nextItem.publicationDate - activeItem.publicationDate);
+        return catalogDataSorted.sort((activeItem, nextItem) => nextItem.publishDate - activeItem.publishDate);
     }
-
 }
 
 
 sortBtns.forEach(elem => {
     elem.addEventListener('click', (e) => {
-        renderCatalog(sort(e.target.value, catalogData));
+        renderCatalog(sort(e.target.value));
     });
 });
+
 
 
 
@@ -565,6 +552,19 @@ sortBtns.forEach(elem => {
 const filterForm = document.querySelector('.filter__form');
 const filterSubmitBtn = filterForm.querySelector('.filter__button');
 const showFavoritesBtn = document.getElementById('favourites');
+
+
+const renderFavorites = (catalogFavoritesData) => {
+    if (!catalogFavoritesData.length) {
+        catalog.textContent = `
+            У вас пока нет избранных товаров. Чтобы отметить товар, кликните на сердечко 
+            в карточке объявления. Вы можете вернуться к списку всех товаров, кликнув
+            ещё раз на «Показать избранные».
+        `;
+    } else {
+        renderCatalog(catalogFavoritesData, catalogFavoritesData.length);
+    }
+}
 
 
 const enablefilters = () => {
@@ -591,22 +591,9 @@ const disablefilters = () => {
 }
 
 
-const renderFavorites = (catalogFavoriteItems) => {
-    if (!catalogFavoriteItems.length) {
-        catalog.textContent = `
-            У вас пока нет избранных товаров. Чтобы отметить товар, кликните на сердечко 
-            в карточке объявления. Вы можете вернуться к списку всех товаров, кликнув
-            ещё раз на «Показать избранные».
-        `;
-    } else {
-        renderCatalog(catalogFavoriteItems, catalogFavoriteItems.length);
-    }
-}
-
-
 const onShowFavoritesBtnClick = () => {
     if (showFavoritesBtn.checked) {
-        renderFavorites(catalogFavoriteItems);
+        renderFavorites(catalogFavoritesData);
         disablefilters();
         showFavorites = true;
     } else {
@@ -621,6 +608,48 @@ showFavoritesBtn.addEventListener('click', onShowFavoritesBtnClick);
 
 
 
+const getSliderValues = (value) => {
+    return value.split(',').map(item => +item);
+}
+
+const checkCardPrice = (catalogItemPrice, minFiltePrice, maxFilterPrice) => {
+    return minFiltePrice <= catalogItemPrice && catalogItemPrice <= maxFilterPrice;
+}
+
+const getFilterData = () => {
+    const { sampleSlider, house, flat, apartments, square, rooms } = filterForm;
+    
+    const filterData = {
+        minPrice: getSliderValues(sampleSlider.value)[0],
+        maxPrice: getSliderValues(sampleSlider.value)[1],
+        house: house.checked,
+        flat: flat.checked,
+        apartments: apartments.checked,
+        square: +square.value,
+        rooms: rooms.value
+    }
+
+    return filterData;
+}
+
+
+const filterCatalogData = (e) => {
+    e.preventDefault();
+
+    const filterData = getFilterData();
+    catalogDataFiltred.splice(0, catalogDataFiltred.length,
+        ...catalogData.filter(
+            elem => (
+                checkCardPrice(elem.price, filterData.minPrice, filterData.maxPrice)
+            )
+        )
+    );
+
+    sort('popular');
+    renderCatalog(catalogDataFiltred);
+}
+
+filterSubmitBtn.addEventListener('click', filterCatalogData);
 
 
 
@@ -629,7 +658,11 @@ showFavoritesBtn.addEventListener('click', onShowFavoritesBtnClick);
 
 
 
-const getSliderValues = () => {
+
+
+
+
+const generateSliderValues = () => {
     const sliderValues = [];
     for (let i = MIN_PRICE; i < MAX_PRICE + 1; i += PRICE_STEP) {
         sliderValues.push(i);
@@ -639,7 +672,7 @@ const getSliderValues = () => {
 
 const mySlider = new rSlider({
     target: '#sampleSlider',
-    values: getSliderValues(),
+    values: generateSliderValues(),
     range: true,
     scale: true,
     labels: false,
