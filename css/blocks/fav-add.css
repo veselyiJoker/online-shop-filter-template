@@ -37,7 +37,7 @@
 }
 
 .fav-add--checked svg {
-  fill: #ffffff;
+  fill: var(--light-blue);
 }
 
 .fav-add--mouseout svg {
