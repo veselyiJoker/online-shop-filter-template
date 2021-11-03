@@ -1,6 +1,5 @@
 .filter {
   width: 348px;
-  overflow-y: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -71,7 +70,6 @@
   padding: 10px 0px 6px 20px;
   background-position: 90.5% 50%;
 }
-
 
 .filter__select-wrapper svg {
   position: absolute;

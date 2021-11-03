@@ -17,6 +17,11 @@
   cursor: pointer;
 }
 
+.product__image img {
+  height: 100%;
+  object-fit: cover;
+}
+
 .product__image-more-photo {
   position: absolute;
   z-index: 1;

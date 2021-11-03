@@ -27,10 +27,6 @@ svg {
   max-width: 100%;
 }
 
-img {
-  object-fit: cover;
-}
-
 textarea {
   resize: none;
   border-radius: 0;

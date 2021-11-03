@@ -2,6 +2,9 @@
 
 const MIN_PRICE = 100000;
 const MAX_PRICE = 1000000;
+
+const PRICE_STEP = 1000;
+
 const ITEMS_COUNT = 25;
 const CATALOG_PAGE_ITEMS_COUNT = 7;
 
@@ -27,7 +30,6 @@ const MAX_DAYS_AGO_MILLISECONDS = MILLISECONDS_IN_DAY * 5;
 const LOCAL_STORAGE_FAVORITE_ITEMS = 'favoriteItems';
 
 const catalogData = [];
-const catalogFavoriteItems = JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)) ? [...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))] : [];
 
 const titlesData = [
     'Загородный дом с видом на озеро',
@@ -150,6 +152,12 @@ const monthsList = [
     'Ноября',
     'Декабря'
 ];
+
+const catalogFavoriteItems = JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)) ? [...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))] : [];
+
+let showFavorites;
+
+
 
 
 const getRandomInteger = (min, max) => {
@@ -308,8 +316,11 @@ const removeFavoriteItem = (catalogItemData) => {
 const onCatalogItemFavoriteBtnClick = (e) => {
     if (e.target.closest('.product__favourite.fav-add')) {
         e.preventDefault();
+        e.target.closest('.product__favourite.fav-add').blur();
+
         const catalogItemId = Number(e.target.closest('.product').dataset.id);
         const catalogItemData = catalogData.find(elem => elem.id === catalogItemId);
+
         if (!catalogItemData.favorite) {
             e.target.closest('.product__favourite.fav-add').classList.add('fav-add--checked');
             addFavoriteItem(catalogItemData);
@@ -325,9 +336,13 @@ const onCatalogItemClick = (e) => {
     if (e.target.closest('.product__image') || e.target.closest('.product__title')) {
         e.preventDefault();
         const catalogItemId = Number(e.target.closest('.product').dataset.id);
-        const catalogItemData = catalogData.find(elem => elem.id === catalogItemId)
-        // popup && renderPopup && showPopup is below ↓ ↓ ↓
-        renderPopup(catalogItemData);
+
+        // renderPopup && showPopup is below ↓ ↓ ↓
+        if (showFavorites) {
+            renderPopup(catalogFavoriteItems.find(elem => elem.id === catalogItemId));
+        } else {
+            renderPopup(catalogData.find(elem => elem.id === catalogItemId));
+        }
         showPopup();
     }
 }
@@ -438,7 +453,6 @@ const renderPopup = (catalogItemData) => {
         ${catalogItemData.location.street ? catalogItemData.location.street : 'Улица не найдена'},
         ${catalogItemData.location.building ? 'Дом ' + catalogItemData.location.building : 'Дом не найден'}
     `;
-
 }
 
 
@@ -498,6 +512,8 @@ const onEscBtnClick = (e) => {
 
 const onPopupFavoriteBtnClick = (e) => {
     e.preventDefault();
+    e.target.closest('.gallery__favourite.fav-add').blur();
+
     const catalogItemId = Number(e.target.closest('.popup').dataset.productId);
     const catalogItemData = catalogData.find(elem => elem.id === catalogItemId);
 
@@ -548,7 +564,7 @@ sortBtns.forEach(elem => {
 
 const filterForm = document.querySelector('.filter__form');
 const filterSubmitBtn = filterForm.querySelector('.filter__button');
-const showFavoriteBtn = document.getElementById('favourites');
+const showFavoritesBtn = document.getElementById('favourites');
 
 
 const enablefilters = () => {
@@ -583,22 +599,24 @@ const renderFavorites = (catalogFavoriteItems) => {
             ещё раз на «Показать избранные».
         `;
     } else {
-        renderCatalog(catalogFavoriteItems);
+        renderCatalog(catalogFavoriteItems, catalogFavoriteItems.length);
     }
 }
 
 
 const onShowFavoritesBtnClick = () => {
-    if (showFavoriteBtn.checked) {
+    if (showFavoritesBtn.checked) {
         renderFavorites(catalogFavoriteItems);
         disablefilters();
+        showFavorites = true;
     } else {
         renderCatalog(catalogDataSorted);
         enablefilters();
+        showFavorites = false;
     }
 }
 
-showFavoriteBtn.addEventListener('click', onShowFavoritesBtnClick);
+showFavoritesBtn.addEventListener('click', onShowFavoritesBtnClick);
 
 
 
@@ -611,18 +629,24 @@ showFavoriteBtn.addEventListener('click', onShowFavoritesBtnClick);
 
 
 
+const getSliderValues = () => {
+    const sliderValues = [];
+    for (let i = MIN_PRICE; i < MAX_PRICE + 1; i += PRICE_STEP) {
+        sliderValues.push(i);
+    }
+    return sliderValues;
+}
 
-
-
-
-
-
-var mySlider = new rSlider({
+const mySlider = new rSlider({
     target: '#sampleSlider',
-    values: [MIN_PRICE, MAX_PRICE],
+    values: getSliderValues(),
     range: true,
-    tooltip: true,
     scale: true,
     labels: false,
-    step: 10,
+    step: PRICE_STEP,
+    width: 315,
 });
+
+
+
+

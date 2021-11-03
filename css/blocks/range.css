@@ -1,7 +1,5 @@
 .rs-container{
-    margin-top: 50px;
-    margin-left: 40px;
-    margin-right: 40px;
+    margin: 50px auto 0 auto;
 }
 
 .rs-container .rs-selected {
@@ -15,8 +13,34 @@
 }
 
 .rs-tooltip {
+    /* left: auto;
+    right: auto;
+    top: -35px; */
     position: absolute;
     color: var(--white);
     background-color: var(--main-blue);
     border-color: var(--main-blue);
+    /* transform: none; */
 }
+
+.rs-container.disabled .rs-tooltip {
+    border-color: #747daa;
+    background-color:#747daa;
+    color: #fff;
+}
+
+/* .rs-pointer {
+    position: static;
+}
+
+.rs-pointer[data-dir="left"] .rs-tooltip {
+    left: 0;
+    right: auto;
+}
+
+.rs-pointer[data-dir="right"] .rs-tooltip {
+    left: auto;
+    right: 0;
+} */
+
+
