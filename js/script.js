@@ -119,7 +119,7 @@ const photosData = [
 
 const typesData = [
     "house",
-    "apartment",
+    "apartments",
     "flat"
 ];
 
@@ -194,7 +194,7 @@ const generateCatalogData = (itemsCount = ITEMS_COUNT) => {
                 building: getRandomInteger(MIN_BUILD_NUMBER, MAX_BUILD_NUMBER),
             },
             photos: generatePhotosArray(photosData, getRandomInteger(MIN_COUNT_PHOTOS, MAX_COUNT_PHOTOS)),
-            filtres: {
+            filters: {
                 type: typesData[getRandomInteger(0, typesData.length - 1)],
                 area: getRandomInteger(MIN_REALTY_AREA, MAX_REALTY_AREA),
                 roomsCount: getRandomInteger(MIN_COUNT_ROOMS, MAX_COUNT_ROOMS),
@@ -425,9 +425,9 @@ const renderPopup = (catalogItemData) => {
     popupGalleryItems = popup.querySelectorAll('.gallery__item');
 
     clearDOMItem(popupChars);
-    popupChars.appendChild(generateCharsItem('Площадь', catalogItemData.filtres.area));
-    popupChars.appendChild(generateCharsItem('Количество комнат', catalogItemData.filtres.roomsCount));
-    popupChars.appendChild(generateCharsItem('Тип недвижимости', catalogItemData.filtres.type));
+    popupChars.appendChild(generateCharsItem('Площадь', catalogItemData.filters.area));
+    popupChars.appendChild(generateCharsItem('Количество комнат', catalogItemData.filters.roomsCount));
+    popupChars.appendChild(generateCharsItem('Тип недвижимости', catalogItemData.filters.type));
 
     popupSellerName.textContent = catalogItemData.seller.name;
     popupSellerRating.textContent = catalogItemData.seller.rating;
@@ -612,9 +612,28 @@ const getSliderValues = (value) => {
     return value.split(',').map(item => +item);
 }
 
-const checkCardPrice = (catalogItemPrice, minFiltePrice, maxFilterPrice) => {
+
+const checkPriceInterval = (catalogItemPrice, minFiltePrice, maxFilterPrice) => {
     return minFiltePrice <= catalogItemPrice && catalogItemPrice <= maxFilterPrice;
 }
+
+
+const checkType = (catalogItemType, house, flat, apartments) => {
+    if (house || flat || apartments) {
+        switch (catalogItemType) {
+            case "house":
+                return house
+
+            case "flat":
+                return flat
+
+            case "apartments":
+                return apartments
+        }
+    }
+    else return true;
+}
+
 
 const getFilterData = () => {
     const { sampleSlider, house, flat, apartments, square, rooms } = filterForm;
@@ -637,10 +656,13 @@ const filterCatalogData = (e) => {
     e.preventDefault();
 
     const filterData = getFilterData();
+    console.log(filterData);
+
     catalogDataFiltred.splice(0, catalogDataFiltred.length,
         ...catalogData.filter(
             elem => (
-                checkCardPrice(elem.price, filterData.minPrice, filterData.maxPrice)
+                checkPriceInterval(elem.price, filterData.minPrice, filterData.maxPrice) &
+                checkType(elem.filters.type, filterData.house, filterData.flat, filterData.apartments) 
             )
         )
     );
