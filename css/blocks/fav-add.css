@@ -39,8 +39,3 @@
 .fav-add--checked svg {
   fill: var(--light-blue);
 }
-
-.fav-add--mouseout svg {
-  fill: none;
-  transform: scale(1);
-}

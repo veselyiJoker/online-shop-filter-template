@@ -13,7 +13,25 @@
   margin-bottom: 17px;
 }
 
+.filter__range {
+  position: relative;
+}
 
+.js-rSlider-min {
+  position: absolute;
+  left: 0;
+  bottom: 50px;
+  line-height: 30px;
+  color: #aaa;
+}
+
+.js-rSlider-max {
+  position: absolute;
+  right: 0;
+  bottom: 50px;
+  line-height: 30px;
+  color: #aaa;
+}
 
 .filter fieldset {
   margin-left: 0;

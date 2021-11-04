@@ -29,6 +29,8 @@ const MAX_DAYS_AGO_MILLISECONDS = MILLISECONDS_IN_DAY * 5;
 
 const LOCAL_STORAGE_FAVORITE_ITEMS = 'favoriteItems';
 
+const DEBOUNCE_INTERVAL = 300;
+
 const catalogData = [];
 
 const titlesData = [
@@ -138,11 +140,9 @@ const monthsList = [
     'Декабря'
 ];
 
-const catalogFavoritesData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)) ? [...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))] : [];
+const catalogDataFavorites = JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)) ? [...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))] : [];
 
-let showFavorites;
-
-
+let showFavorites = false;
 
 
 
@@ -199,7 +199,7 @@ const generateCatalogData = (itemsCount = ITEMS_COUNT) => {
                 area: getRandomInteger(MIN_REALTY_AREA, MAX_REALTY_AREA),
                 roomsCount: getRandomInteger(MIN_COUNT_ROOMS, MAX_COUNT_ROOMS),
             },
-            favorite: catalogFavoritesData.find(elem => elem.id === i) ? true : false,
+            favorite: catalogDataFavorites.find(elem => elem.id === i) ? true : false,
         });
     }
     return newCatalogData;
@@ -266,6 +266,7 @@ const generateCatalogItem = (catalogItemData) => {
 
 
 const renderCatalog = (catalogData, itemsCount = CATALOG_PAGE_ITEMS_COUNT) => {
+    removeCatalogEvents(catalog.querySelectorAll('.results__item'));
     clearDOMItem(catalog);
 
     const fragment = document.createDocumentFragment();
@@ -276,39 +277,39 @@ const renderCatalog = (catalogData, itemsCount = CATALOG_PAGE_ITEMS_COUNT) => {
     });
     
     catalog.appendChild(fragment);
+
+    addCatalogEvents(catalog.querySelectorAll('.results__item'));
+
 };
+
+
+const addCatalogEvents = (catalogItems) => {
+    catalogItems.forEach(elem => {
+        elem.addEventListener('click', onCatalogItemClick);
+        elem.querySelector('button.fav-add').addEventListener('click', onCatalogItemFavoriteBtnClick);
+    });
+}
+
+
+const removeCatalogEvents = (catalogItems) => {
+    catalogItems.forEach(elem => {
+        elem.removeEventListener('click', onCatalogItemClick);
+        elem.querySelector('button.fav-add').removeEventListener('click', onCatalogItemFavoriteBtnClick);
+    });
+}
 
 
 const addFavoriteItem = (catalogItemData) => {
     catalogItemData.favorite = true;
-    catalogFavoritesData.push(catalogItemData);
-    localStorage.setItem(LOCAL_STORAGE_FAVORITE_ITEMS, JSON.stringify(catalogFavoritesData));
+    catalogDataFavorites.push(catalogItemData);
+    localStorage.setItem(LOCAL_STORAGE_FAVORITE_ITEMS, JSON.stringify(catalogDataFavorites));
 }
 
 
 const removeFavoriteItem = (catalogItemData) => {
     catalogItemData.favorite = false;
-    catalogFavoritesData.splice(catalogFavoritesData.findIndex(elem => elem.id === catalogItemData.id),1);
-    localStorage.setItem(LOCAL_STORAGE_FAVORITE_ITEMS, JSON.stringify(catalogFavoritesData));
-}
-
-
-const onCatalogItemFavoriteBtnClick = (e) => {
-    if (e.target.closest('.product__favourite.fav-add')) {
-        e.preventDefault();
-        e.target.closest('.product__favourite.fav-add').blur();
-
-        const catalogItemId = Number(e.target.closest('.product').dataset.id);
-        const catalogItemData = catalogData.find(elem => elem.id === catalogItemId);
-
-        if (!catalogItemData.favorite) {
-            e.target.closest('.product__favourite.fav-add').classList.add('fav-add--checked');
-            addFavoriteItem(catalogItemData);
-        } else {
-            e.target.closest('.product__favourite.fav-add').classList.remove('fav-add--checked');
-            removeFavoriteItem(catalogItemData);
-        }
-    }
+    catalogDataFavorites.splice(catalogDataFavorites.findIndex(elem => elem.id === catalogItemData.id),1);
+    localStorage.setItem(LOCAL_STORAGE_FAVORITE_ITEMS, JSON.stringify(catalogDataFavorites));
 }
 
 
@@ -317,27 +318,34 @@ const onCatalogItemClick = (e) => {
         e.preventDefault();
         const catalogItemId = Number(e.target.closest('.product').dataset.id);
 
-        // renderPopup && showPopup is below ↓ ↓ ↓
+        // renderPopup is below ↓ ↓ ↓
         if (showFavorites) {
-            renderPopup(catalogFavoritesData.find(elem => elem.id === catalogItemId));
+            renderPopup(catalogDataFavorites.find(elem => elem.id === catalogItemId));
         } else {
             renderPopup(catalogData.find(elem => elem.id === catalogItemId));
         }
-        showPopup();
     }
 }
 
 
-const onCatalogClick = (e) => {
-    if (e.target.closest('.product')) {
-        onCatalogItemFavoriteBtnClick(e);
-        onCatalogItemClick(e);
+const onCatalogItemFavoriteBtnClick = (e) => {
+    e.preventDefault();
+    e.target.closest('.product__favourite.fav-add').blur();
+
+    const catalogItemId = Number(e.target.closest('.product').dataset.id);
+    const catalogItemData = catalogData.find(elem => elem.id === catalogItemId);
+
+    if (!catalogItemData.favorite) {
+        e.target.closest('.product__favourite.fav-add').classList.add('fav-add--checked');
+        addFavoriteItem(catalogItemData);
+    } else {
+        e.target.closest('.product__favourite.fav-add').classList.remove('fav-add--checked');
+        removeFavoriteItem(catalogItemData);
     }
-};
+}
 
 
 renderCatalog(catalogData);
-catalog.addEventListener('click', onCatalogClick);
 
 
 
@@ -360,10 +368,10 @@ const popupDescription = popup.querySelector('.popup__description p');
 const popupAddress = popup.querySelector('.popup__address');
 
 
-const generateGalleryItem = (photo, id) => {
+const generateGalleryItem = (photo, ordinalNumber) => {
     const template = `
-        <li class="gallery__item ${id == 0 ? 'gallery__item--active': ''}">
-            <img src="${photo.link}" width="124" height="80" alt="${photo.description}" data-id="${id}">
+        <li class="gallery__item ${ordinalNumber == 0 ? 'gallery__item--active' : ''}" data-ordinal-number="${ordinalNumber}">
+            <img src="${photo.link}" width="124" height="80" alt="${photo.description}">
         </li>
     `;
     return generateDOMItem(template);
@@ -379,23 +387,6 @@ const generateGalleryList = (photos) => {
 }
 
 
-const onPopupGaleryClick = (e) => {
-    if (e.target.closest('.gallery__item')) {
-
-        if (showFavorites) {
-            popupGalleryMainImg.src = catalogFavoritesData[e.target.closest('.popup').dataset.productId].photos[e.target.closest('.gallery__item img').dataset.id].link;
-        } else {
-            popupGalleryMainImg.src = catalogData[e.target.closest('.popup').dataset.productId].photos[e.target.closest('.gallery__item img').dataset.id].link;
-        }
-    
-        popupGalleryItems.forEach(elem => {
-            elem.classList.remove('gallery__item--active');
-        });
-        e.target.closest('.gallery__item').classList.add('gallery__item--active');
-    }
-}
-
-
 const generateCharsItem = (charsName, charsValue) => {
     const template = `
         <li class="chars__item">
@@ -407,9 +398,20 @@ const generateCharsItem = (charsName, charsValue) => {
 }
 
 
-const renderPopup = (catalogItemData) => {
-    popup.setAttribute('data-product-id', catalogItemData.id);
+const transformToType = (type) => {
+    switch (type) {
+        case 'house': 
+            return 'Дом';
+        case 'apartments':
+            return 'Апартаменты';
+        case 'flat':
+            return 'Квартира';
+        default: return 'Неизвестный тип';
+    }
+}
 
+
+const renderPopup = (catalogItemData) => {
     popupDate.textContent = transformToDate(catalogItemData.publishDate);
 
     popupTitle.textContent = catalogItemData.title;
@@ -427,7 +429,7 @@ const renderPopup = (catalogItemData) => {
     clearDOMItem(popupChars);
     popupChars.appendChild(generateCharsItem('Площадь', catalogItemData.filters.area));
     popupChars.appendChild(generateCharsItem('Количество комнат', catalogItemData.filters.roomsCount));
-    popupChars.appendChild(generateCharsItem('Тип недвижимости', catalogItemData.filters.type));
+    popupChars.appendChild(generateCharsItem('Тип недвижимости', transformToType(catalogItemData.filters.type)));
 
     popupSellerName.textContent = catalogItemData.seller.name;
     popupSellerRating.textContent = catalogItemData.seller.rating;
@@ -439,17 +441,54 @@ const renderPopup = (catalogItemData) => {
         ${catalogItemData.location.street ? catalogItemData.location.street : 'Улица не найдена'},
         ${catalogItemData.location.building ? 'Дом ' + catalogItemData.location.building : 'Дом не найден'}
     `;
+
+    addPopupEvents(catalogItemData);
+
+    popup.classList.add('popup--active');
 }
 
 
-const addPopupEvents = () => {
+
+let onPopupGaleryClick;
+let onPopupFavoriteBtnClick;
+
+const addPopupEvents = (catalogItemData) => {
+
+    onPopupGaleryClick = (e) => {
+        if (e.target.closest('.gallery__item')) {
+            popupGalleryMainImg.src = catalogItemData.photos[e.target.closest('.gallery__item').dataset.ordinalNumber].link;
+        
+            popupGalleryItems.forEach(elem => {
+                elem.classList.remove('gallery__item--active');
+            });
+            e.target.closest('.gallery__item').classList.add('gallery__item--active');
+        }
+    }
+
+    onPopupFavoriteBtnClick = (e) => {
+        e.preventDefault();
+        e.target.closest('.gallery__favourite.fav-add').blur();
+    
+        const catalogItemId = catalogItemData.id;
+        const catalogItem = catalogData.find(elem => elem.id === catalogItemId);
+    
+        if (!catalogItemData.favorite) {
+            e.target.closest('.gallery__favourite.fav-add').classList.add('fav-add--checked');
+            addFavoriteItem(catalogItem);
+            catalog.querySelector(`.product[data-id="${catalogItemId}"]`).querySelector('.product__favourite.fav-add').classList.add('fav-add--checked');
+        } else {
+            e.target.closest('.gallery__favourite.fav-add').classList.remove('fav-add--checked');
+            removeFavoriteItem(catalogItem);
+            catalog.querySelector(`.product[data-id="${catalogItemId}"]`).querySelector('.product__favourite.fav-add').classList.remove('fav-add--checked');
+        }
+    
+    }
+   
     popup.addEventListener('click', onPopupOverlayClick);
     popupCloseBtn.addEventListener('click', onPopupCloseBtnClick);
     document.addEventListener('keydown', onEscBtnClick);
-
-    favoriteBtn.addEventListener('click', onPopupFavoriteBtnClick);
-
     popupGalery.addEventListener('click', onPopupGaleryClick);
+    favoriteBtn.addEventListener('click', onPopupFavoriteBtnClick);
 }
 
 
@@ -457,20 +496,14 @@ const removePopupEvents = () => {
     popup.removeEventListener('click', onPopupOverlayClick);
     popupCloseBtn.removeEventListener('click', onPopupCloseBtnClick);
     document.removeEventListener('keydown', onEscBtnClick);
+    favoriteBtn.removeEventListener('click', onPopupFavoriteBtnClick);
+    popupGalery.removeEventListener('click', onPopupGaleryClick);
 
     favoriteBtn.removeEventListener('click', onPopupFavoriteBtnClick);
-
-    popupGalery.removeEventListener('click', onPopupGaleryClick);
 }
 
 
-const showPopup = () => {
-    addPopupEvents();
-    popup.classList.add('popup--active');
-}
-
-
-const hidePopup = () => {
+const closePopup = () => {
     removePopupEvents();
     popup.classList.remove('popup--active');
 }
@@ -478,44 +511,34 @@ const hidePopup = () => {
 
 const onPopupOverlayClick = (e) => {
     if (e.target.classList.contains('popup')) {
-        hidePopup();
+        closePopup();
     }
 }
 
 
 const onPopupCloseBtnClick = () => {
-    hidePopup();
+    closePopup();
 }
 
 
 const onEscBtnClick = (e) => {
     if (e.key === 'Escape') {
         e.preventDefault()
-        hidePopup();
+        closePopup();
     }
 }
 
 
-const onPopupFavoriteBtnClick = (e) => {
-    e.preventDefault();
-    e.target.closest('.gallery__favourite.fav-add').blur();
 
-    const catalogItemId = Number(e.target.closest('.popup').dataset.productId);
-    const catalogItemData = catalogData.find(elem => elem.id === catalogItemId);
+let timeout;
 
-    if (!catalogItemData.favorite) {
-        e.target.closest('.gallery__favourite.fav-add').classList.add('fav-add--checked');
-        addFavoriteItem(catalogItemData);
-        catalog.querySelector(`.product[data-id="${catalogItemId}"]`).querySelector('.product__favourite.fav-add').classList.add('fav-add--checked');
-    } else {
-        e.target.closest('.gallery__favourite.fav-add').classList.remove('fav-add--checked');
-        removeFavoriteItem(catalogItemData);
-        catalog.querySelector(`.product[data-id="${catalogItemId}"]`).querySelector('.product__favourite.fav-add').classList.remove('fav-add--checked');
-    }
-
+const debounce = (callback) => {
+    return function(){
+      const funcSteps = () => { callback.apply(this, arguments) }
+      clearTimeout(timeout);
+      timeout = setTimeout(funcSteps, DEBOUNCE_INTERVAL)
+    };
 }
-
-
 
 
 const catalogDataFiltred = [...catalogData];
@@ -540,9 +563,10 @@ const sort = (type) => {
 
 
 sortBtns.forEach(elem => {
-    elem.addEventListener('click', (e) => {
-        renderCatalog(sort(e.target.value));
-    });
+    elem.addEventListener('click', debounce( (e) => {
+            renderCatalog(sort(e.target.value));
+        })
+    );
 });
 
 
@@ -554,15 +578,15 @@ const filterSubmitBtn = filterForm.querySelector('.filter__button');
 const showFavoritesBtn = document.getElementById('favourites');
 
 
-const renderFavorites = (catalogFavoritesData) => {
-    if (!catalogFavoritesData.length) {
+const renderFavorites = (catalogDataFavorites) => {
+    if (!catalogDataFavorites.length) {
         catalog.textContent = `
             У вас пока нет избранных товаров. Чтобы отметить товар, кликните на сердечко 
             в карточке объявления. Вы можете вернуться к списку всех товаров, кликнув
             ещё раз на «Показать избранные».
         `;
     } else {
-        renderCatalog(catalogFavoritesData, catalogFavoritesData.length);
+        renderCatalog(catalogDataFavorites, catalogDataFavorites.length);
     }
 }
 
@@ -593,14 +617,22 @@ const disablefilters = () => {
 
 const onShowFavoritesBtnClick = () => {
     if (showFavoritesBtn.checked) {
-        renderFavorites(catalogFavoritesData);
+        renderFavorites(catalogDataFavorites);
         disablefilters();
         showFavorites = true;
     } else {
         renderCatalog(catalogDataSorted);
+        catalogDataFavorites.splice(0, catalogDataFavorites.length, 
+            ...catalogDataFavorites.filter(
+                elem => (
+                    elem.favorite
+                )
+            )
+        );
         enablefilters();
         showFavorites = false;
     }
+
 }
 
 showFavoritesBtn.addEventListener('click', onShowFavoritesBtnClick);
@@ -608,8 +640,13 @@ showFavoritesBtn.addEventListener('click', onShowFavoritesBtnClick);
 
 
 
+
 const getSliderValues = (value) => {
-    return value.split(',').map(item => +item);
+    let values = value.split(',').map(item => +item);
+    return {
+        min: values[0],
+        max: values[1]
+    }
 }
 
 
@@ -635,12 +672,29 @@ const checkType = (catalogItemType, house, flat, apartments) => {
 }
 
 
+const checkRoomsCount = (catalogItemRoomsCount, filterRoomsCount) => {
+    switch (filterRoomsCount) {
+        case 'one':
+            return catalogItemRoomsCount === 1;
+        case 'two':
+            return catalogItemRoomsCount === 2;
+        case 'three':
+            return catalogItemRoomsCount === 3;
+        case 'four':
+            return catalogItemRoomsCount === 4;
+        case 'fivemore':
+            return catalogItemRoomsCount >= 5;
+        default: return true;
+    }
+}
+
+
 const getFilterData = () => {
     const { sampleSlider, house, flat, apartments, square, rooms } = filterForm;
     
     const filterData = {
-        minPrice: getSliderValues(sampleSlider.value)[0],
-        maxPrice: getSliderValues(sampleSlider.value)[1],
+        minPrice: getSliderValues(sampleSlider.value).min,
+        maxPrice: getSliderValues(sampleSlider.value).max,
         house: house.checked,
         flat: flat.checked,
         apartments: apartments.checked,
@@ -656,13 +710,14 @@ const filterCatalogData = (e) => {
     e.preventDefault();
 
     const filterData = getFilterData();
-    console.log(filterData);
 
     catalogDataFiltred.splice(0, catalogDataFiltred.length,
         ...catalogData.filter(
             elem => (
                 checkPriceInterval(elem.price, filterData.minPrice, filterData.maxPrice) &
-                checkType(elem.filters.type, filterData.house, filterData.flat, filterData.apartments) 
+                checkType(elem.filters.type, filterData.house, filterData.flat, filterData.apartments) &
+                checkRoomsCount(elem.filters.roomsCount, filterData.rooms) &
+                elem.filters.area >= filterData.square
             )
         )
     );
@@ -681,7 +736,8 @@ filterSubmitBtn.addEventListener('click', filterCatalogData);
 
 
 
-
+const mySliderMinValue = document.querySelector('.js-rSlider-min .value');
+const mySliderMaxValue = document.querySelector('.js-rSlider-max .value');
 
 
 const generateSliderValues = () => {
@@ -692,14 +748,20 @@ const generateSliderValues = () => {
     return sliderValues;
 }
 
+
 const mySlider = new rSlider({
     target: '#sampleSlider',
     values: generateSliderValues(),
     range: true,
+    tooltip: false,
     scale: true,
     labels: false,
     step: PRICE_STEP,
     width: 315,
+    onChange: function (values) {
+        mySliderMinValue.textContent = getSliderValues(values).min;
+        mySliderMaxValue.textContent = getSliderValues(values).max;
+    }
 });
 
 
