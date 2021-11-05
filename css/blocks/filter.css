@@ -25,12 +25,36 @@
   color: #aaa;
 }
 
+.js-rSlider-min .value {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  color: #aaa;
+  outline: none;
+}
+
+.js-rSlider-min .value:focus {
+  color: var(--dark-blue);
+}
+
 .js-rSlider-max {
   position: absolute;
   right: 0;
   bottom: 50px;
   line-height: 30px;
   color: #aaa;
+}
+
+.js-rSlider-max .value{
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: none;
+  color: #aaa;
+  outline: none;
+  text-align: right;
+
 }
 
 .filter fieldset {
@@ -96,7 +120,7 @@
   cursor: pointer;
 
   fill: var(--main-blue);
-  }
+}
 
 .filter__select-wrapper {
   position: relative;
@@ -413,9 +437,13 @@ input::-webkit-inner-spin-button {
 
 .filter__checkboxes-item input:checked:disabled + label::before {
   background-image: url("../../img/icon-tick_disabled.svg");
+  background-repeat: no-repeat;
+  background-position: center;
   background-color: var(--disabled-bg);
   border-color: var(--disabled-bg);
+  transition: none;
   cursor: default;
+  z-index: 2;
 }
 
 .filter__checkboxes-item input:checked:disabled + label {

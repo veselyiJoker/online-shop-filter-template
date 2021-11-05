@@ -131,6 +131,8 @@
   margin-bottom: 16px;
   background-color: var(--disabled-bg);
   border-radius: 4px;
+  width: 268px;
+  height: 180px;
 }
 
 .popup__address {

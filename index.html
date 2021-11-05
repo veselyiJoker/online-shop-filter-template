@@ -10,6 +10,8 @@
       <link rel="preload" href="fonts/Montserrat-SemiBold.woff2" as="font">
       <link rel="preload" href="fonts/Montserrat-Regular.woff2" as="font">
       <title>Главная</title>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
     </head>
 
     <body>
@@ -232,15 +234,12 @@
               </div>
             </div>
             <div class="popup__right">
-              <div class="popup__map">
-                <img src="img/map.jpg" width="268" height="180" alt="Москва, Нахимовский проспект, дом 5">
-              </div>
+              <div class="popup__map" id="map"></div>
               <div class="popup__address">Москва, Нахимовский проспект, дом 5</div>
             </div>
           </div>
         </div>
       </section>
-      <script src="./js/rSlider.min.js"></script>
-      <script src="./js/script.js"></script>
+      <script type="module" src="./js/main.js"></script>
     </body>
 </html>
