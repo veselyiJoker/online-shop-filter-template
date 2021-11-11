@@ -1,4 +1,5 @@
 'use strict';
+
 import { addFavoriteItem, removeFavoriteItem } from "./favorites.js";
 import {
     clearDOMItem,
@@ -6,24 +7,17 @@ import {
     transformToDate,
     transformToPrice 
 } from "./common.js";
-import { changeMapCords } from "./map.js";
-// import { initMap } from "./map.js";
 
 const popup = document.querySelector('.popup');
-const popupCloseBtn = popup.querySelector('.popup__close');
-const popupDate = popup.querySelector('.popup__date');
-const popupTitle = popup.querySelector('.popup__title');
-const popupPrice = popup.querySelector('.popup__price');
-const popupGalery = popup.querySelector('.popup__gallery');
-const favoriteBtn = popup.querySelector('.gallery__favourite.fav-add');
-const popupGalleryMainImg = popup.querySelector('.gallery__main-pic img');
-const popupGalleryList = popup.querySelector('.gallery__list');
-let popupGalleryItems = popup.querySelectorAll('.gallery__item');
-const popupChars = popup.querySelector('.popup__chars');
-const popupSellerName = popup.querySelector('.seller__name');
-const popupSellerRating = popup.querySelector('.seller__rating');
-const popupDescription = popup.querySelector('.popup__description p');
-const popupAddress = popup.querySelector('.popup__address');
+
+let popupCloseBtn;
+let favoriteBtn;
+let popupGalery;
+let popupGalleryMainImg;
+let popupGalleryItems;
+
+let onPopupGaleryClick;
+let onPopupFavoriteBtnClick;
 
 
 const generateGalleryItem = (photo, title, ordinalNumber) => {
@@ -55,6 +49,7 @@ const generateCharsItem = (charsName, charsValue) => {
     return generateDOMItem(template);
 }
 
+
 const transformToType = (type) => {
     switch (type) {
         case 'house': 
@@ -63,54 +58,79 @@ const transformToType = (type) => {
             return 'Апартаменты';
         case 'flat':
             return 'Квартира';
-        default: return 'Неизвестный тип';
+        default: 
+            return '';
     }
 }
 
-export const renderPopup = (elem, catalogItemData) => {
-    popupDate.textContent = transformToDate(catalogItemData.publishDate);
 
-    popupTitle.textContent = catalogItemData.title;
+const generatePopupChars = (charsData) => {
+    const fragment = document.createDocumentFragment();
 
-    popupPrice.textContent = transformToPrice(catalogItemData.price) + ' ₽';
+    fragment.appendChild(generateCharsItem('Площадь', charsData.area));
+    fragment.appendChild(generateCharsItem('Количество комнат', charsData.roomsCount));
+    fragment.appendChild(generateCharsItem('Тип недвижимости', transformToType(charsData.type)));
 
-    catalogItemData.favorite === true ? favoriteBtn.classList.add('fav-add--checked') : favoriteBtn.classList.remove('fav-add--checked');
+    return fragment;
+}
 
-    popupGalleryMainImg.src = catalogItemData.photos[0];
 
-    clearDOMItem(popupGalleryList);
-    popupGalleryList.appendChild(generateGalleryList(catalogItemData.photos, catalogItemData.title));
-    popupGalleryItems = popup.querySelectorAll('.gallery__item');
+const generatePopup = (catalogItemData) => {
 
-    clearDOMItem(popupChars);
-    popupChars.appendChild(generateCharsItem('Площадь', catalogItemData.filters.area));
-    popupChars.appendChild(generateCharsItem('Количество комнат', catalogItemData.filters.roomsCount));
-    popupChars.appendChild(generateCharsItem('Тип недвижимости', transformToType(catalogItemData.filters.type)));
+    const newPopupFragment = document.createDocumentFragment();
+    newPopupFragment.appendChild(generateDOMItem(popup.innerHTML));
 
-    popupSellerName.textContent = catalogItemData.seller.fullname;
-    popupSellerRating.textContent = catalogItemData.seller.rating;
+    const newPopupFavoriteBtn = newPopupFragment.querySelector('.gallery__favourite.fav-add');
+    const newPopupGalleryList = newPopupFragment.querySelector('.gallery__list');
+    const newPopupChars = popup.querySelector('.popup__chars');
+    const newPopupAddress = newPopupFragment.querySelector('.popup__address');
 
-    popupDescription.textContent = catalogItemData.description;
+    newPopupFragment.querySelector('.popup__date').textContent = transformToDate(catalogItemData.publishDate);
+    newPopupFragment.querySelector('.popup__title').textContent = catalogItemData.title;
+    newPopupFragment.querySelector('.popup__price').textContent = transformToPrice(catalogItemData.price) + ' ₽';
+    newPopupFragment.querySelector('.seller__name').textContent = catalogItemData.seller.fullname;
+    newPopupFragment.querySelector('.seller__rating span').textContent = catalogItemData.seller.rating;
+    newPopupFragment.querySelector('.popup__description p').textContent = catalogItemData.description;
+    newPopupFragment.querySelector('.gallery__main-pic img').src = catalogItemData.photos[0];  
 
-    popupAddress.textContent = `
-        ${catalogItemData.address.city ? catalogItemData.address.city : 'Город не найден'},
-        ${catalogItemData.address.street ? catalogItemData.address.street : 'Улица не найдена'},
-        ${catalogItemData.address.building ? 'Дом ' + catalogItemData.address.building : 'Дом не найден'}
+    if (catalogItemData.favorite) {
+        newPopupFavoriteBtn.classList.add('fav-add--checked');
+    } else {
+        newPopupFavoriteBtn.classList.remove('fav-add--checked');
+    }
+
+    clearDOMItem(newPopupGalleryList);
+    newPopupGalleryList.appendChild(generateGalleryList(catalogItemData.photos, catalogItemData.title));
+
+    clearDOMItem(newPopupChars);
+    newPopupChars.appendChild(generatePopupChars(catalogItemData.filters));
+
+    newPopupAddress.textContent = `
+        ${catalogItemData.address.city ? catalogItemData.address.city : ''},
+        ${catalogItemData.address.street ? catalogItemData.address.street : ''},
+        ${catalogItemData.address.building ? 'Дом ' + catalogItemData.address.building : ''}
     `;
 
+    clearDOMItem(popup);
+
+    return newPopupFragment;
+}
+
+
+export const renderPopup = (elem, catalogItemData) => {
+    popup.appendChild(generatePopup(catalogItemData));
     addPopupEvents(elem, catalogItemData);
-
-    changeMapCords(catalogItemData.coordinates[0], catalogItemData.coordinates[1]);
-
     popup.classList.add('popup--active');
 }
 
 
-
-let onPopupGaleryClick;
-let onPopupFavoriteBtnClick;
-
 const addPopupEvents = (elem, catalogItemData) => {
+
+    popupCloseBtn = popup.querySelector('.popup__close');
+    favoriteBtn = popup.querySelector('.gallery__favourite.fav-add');
+    popupGalery = popup.querySelector('.popup__gallery');
+    popupGalleryMainImg = popup.querySelector('.gallery__main-pic img');
+    popupGalleryItems = popup.querySelectorAll('.gallery__item');
 
     onPopupGaleryClick = (e) => {
         if (e.target.closest('.gallery__item')) {
@@ -137,25 +157,22 @@ const addPopupEvents = (elem, catalogItemData) => {
             removeFavoriteItem(catalogItemData);
             elem.querySelector('.product__favourite.fav-add').classList.remove('fav-add--checked');
         }
-    
     }
    
+    document.addEventListener('keydown', onEscBtnClick);
     popup.addEventListener('click', onPopupOverlayClick);
     popupCloseBtn.addEventListener('click', onPopupCloseBtnClick);
-    document.addEventListener('keydown', onEscBtnClick);
     popupGalery.addEventListener('click', onPopupGaleryClick);
     favoriteBtn.addEventListener('click', onPopupFavoriteBtnClick);
 }
 
 
 const removePopupEvents = () => {
+    document.removeEventListener('keydown', onEscBtnClick);
     popup.removeEventListener('click', onPopupOverlayClick);
     popupCloseBtn.removeEventListener('click', onPopupCloseBtnClick);
-    document.removeEventListener('keydown', onEscBtnClick);
     favoriteBtn.removeEventListener('click', onPopupFavoriteBtnClick);
     popupGalery.removeEventListener('click', onPopupGaleryClick);
-
-    favoriteBtn.removeEventListener('click', onPopupFavoriteBtnClick);
 }
 
 

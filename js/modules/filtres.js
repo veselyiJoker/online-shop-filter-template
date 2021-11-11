@@ -158,7 +158,7 @@ export const disablefilters = () => {
     mySlider.disabled(true);
 }
 
-
+// OMG ask how to correct later 1000000000%
 export const getFilterForm = () => {
     return filterForm;
 }

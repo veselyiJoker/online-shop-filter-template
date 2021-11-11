@@ -32,6 +32,7 @@ export const initSortBtns = (catalogData) => {
     });
 }
 
+// OMG 2 ask how to correct later 1000000000%
 export const getCatalogDataSorted = () => {
   return catalogDataSorted;
 }

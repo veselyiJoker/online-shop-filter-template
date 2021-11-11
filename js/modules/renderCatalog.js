@@ -20,8 +20,7 @@ import {
 const catalog = document.querySelector('.results__list');
 const renderedCatalogData = [];
 
-
-const generateCatalogItem = (catalogItemData) => {    
+const generateCatalogItem = (catalogItemData) => {   
     const catalogItem = `
         <li class="results__item product" data-id="${catalogItemData.id}">
             <button class="product__favourite fav-add ${catalogItemData.favorite ? 'fav-add--checked' : ''}" type="button" aria-label="Добавить в избранное">
@@ -54,7 +53,6 @@ const onCatalogItemClick = (e) => {
     if (e.target.closest('.product__image') || e.target.closest('.product__title')) {
         e.preventDefault();
         const catalogItemId = Number(e.target.closest('.product').dataset.id);
-
         renderPopup(e.target.closest('.product'), renderedCatalogData.find(elem => elem.id === catalogItemId));
     }
 }
@@ -109,6 +107,7 @@ export const renderCatalog = (catalogData, itemsCount = getCatalogItemsCount(cat
     addCatalogEvents(catalog.querySelectorAll('.results__item'), renderedCatalogData);
 };
 
+// correct later
 export const getCatalog = () => {
     return catalog;
 }

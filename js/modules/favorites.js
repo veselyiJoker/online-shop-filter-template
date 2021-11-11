@@ -1,12 +1,25 @@
 'use strict';
 
 import { disablefilters, enablefilters } from "./filtres.js";
-import { renderCatalog, getCatalog } from "./renderCatalog.js";
+import { getCatalog, renderCatalog} from "./renderCatalog.js";
 import { getCatalogDataSorted} from "./sorting.js";
 
 const LOCAL_STORAGE_FAVORITE_ITEMS = 'favoriteItems';
 
-const catalogDataFavorites = JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)) ? [...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))] : [];
+const catalogDataFavorites = [];
+
+// хотел тетнарным оператором сказали делать функцию
+const generateCatalogDataFavorites = () => {
+    const newCatalogDataFavorites = [];
+    if ( Array.isArray(JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))) ) {
+        newCatalogDataFavorites.push(...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)));
+    }
+    return newCatalogDataFavorites;
+}
+
+catalogDataFavorites.push(...generateCatalogDataFavorites());
+
+const showFavoritesBtn = document.getElementById('favourites');
 
 export const checkFavorites = (catalogItemData) => {
     return catalogDataFavorites.find(elem => elem.id === catalogItemData.id) ? true : false;
@@ -27,10 +40,6 @@ export const removeFavoriteItem = (catalogItemData) => {
 }
 
 
-
-
-const showFavoritesBtn = document.getElementById('favourites');
-
 const renderFavorites = (catalogData) => {
     if (!catalogData.length) {
         getCatalog().textContent = `
@@ -42,7 +51,6 @@ const renderFavorites = (catalogData) => {
         renderCatalog(catalogData, catalogData.length);
     }
 }
-
 
 
 export const initShowFavoritesBtn = () => {

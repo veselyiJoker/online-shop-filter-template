@@ -1,5 +1,6 @@
-import './rSlider.min.js';
+'use strict';
 
+import './rSlider.min.js';
 
 const DATE_NOW = Date.now();
 const MILLISECONDS_IN_DAY = 86400000;
@@ -32,32 +33,32 @@ export const adapter = (catalogData) => {
     const catalog = [];
     
     for (let i = 0; i < catalogData.length; i++) {
-        const catalogItem = catalogData[i];
-
-        catalog.push({
-            id: i,
-            title: catalogItem.name,
-            description: catalogItem.description,
-            category: catalogItem.category,
-            price: catalogItem.price,
-            address: {
-                city: catalogItem.address.city,
-                street: catalogItem.address.street,
-                building: catalogItem.address.building,
-            },
-            coordinates: catalogItem.coordinates,
-            seller: {
-                fullname: catalogItem.seller.fullname,
-                rating: catalogItem.seller.rating,
-            },
-            publishDate: +catalogItem['publish-date'],
-            photos: catalogItem.photos,
-            filters: {
-                type: catalogItem.filters.type,
-                area: catalogItem.filters.area,    
-                roomsCount: catalogItem.filters['rooms-count'],
-            },
-            favorite: false,
+        catalogData.forEach(elem => {
+            catalog.push({
+                id: catalogData.indexOf(elem),
+                title: elem.name,
+                description: elem.description,
+                category: elem.category,
+                price: elem.price,
+                address: {
+                    city: elem.address.city,
+                    street: elem.address.street,
+                    building: elem.address.building,
+                },
+                coordinates: elem.coordinates,
+                seller: {
+                    fullname: elem.seller.fullname,
+                    rating: elem.seller.rating,
+                },
+                publishDate: +elem['publish-date'],
+                photos: elem.photos,
+                filters: {
+                    type: elem.filters.type,
+                    area: elem.filters.area,    
+                    roomsCount: elem.filters['rooms-count'],
+                },
+                favorite: false,
+            })
         })
     }   
     return catalog;
@@ -100,7 +101,7 @@ export const transformToDate = (publishDate) => {
     }
 }
 
-
+// correct later
 let timeout;
 
 export const debounce = (callback) => {
