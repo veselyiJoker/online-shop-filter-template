@@ -1,8 +1,8 @@
 'use strict';
 
 import { disablefilters, enablefilters } from "./filtres.js";
-import { getCatalog, renderCatalog} from "./renderCatalog.js";
-import { getCatalogDataSorted} from "./sorting.js";
+import { catalog, renderCatalog} from "./renderCatalog.js";
+import { catalogDataSorted} from "./sorting.js";
 
 const LOCAL_STORAGE_FAVORITE_ITEMS = 'favoriteItems';
 
@@ -11,7 +11,7 @@ const catalogDataFavorites = [];
 // хотел тетнарным оператором сказали делать функцию
 const generateCatalogDataFavorites = () => {
     const newCatalogDataFavorites = [];
-    if ( Array.isArray(JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS))) ) {
+    if (Array.isArray(JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)))) {
         newCatalogDataFavorites.push(...JSON.parse(localStorage.getItem(LOCAL_STORAGE_FAVORITE_ITEMS)));
     }
     return newCatalogDataFavorites;
@@ -42,7 +42,7 @@ export const removeFavoriteItem = (catalogItemData) => {
 
 const renderFavorites = (catalogData) => {
     if (!catalogData.length) {
-        getCatalog().textContent = `
+        catalog.textContent = `
             У вас пока нет избранных товаров. Чтобы отметить товар, кликните на сердечко 
             в карточке объявления. Вы можете вернуться к списку всех товаров, кликнув
             ещё раз на «Показать избранные».
@@ -60,7 +60,7 @@ export const initShowFavoritesBtn = () => {
             renderFavorites(catalogDataFavorites);
             disablefilters();
         } else {
-            renderCatalog(getCatalogDataSorted());
+            renderCatalog(catalogDataSorted);
             enablefilters();
         }
     

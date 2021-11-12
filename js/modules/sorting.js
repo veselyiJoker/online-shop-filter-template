@@ -3,8 +3,8 @@
 import { debounce } from "./common.js";
 import { renderCatalog } from "./renderCatalog.js";
 
-const catalogDataSorted = [];
-const sortBtns = document.querySelectorAll('.sorting__order-tab input[name=sorting-order]');
+export const catalogDataSorted = [];
+export const sortBtns = document.querySelectorAll('.sorting__order-tab input[name=sorting-order]');
 
 export const sort = (type, catalogData) => {
     catalogDataSorted.splice(0, catalogDataSorted.length, ...catalogData);
@@ -21,22 +21,12 @@ export const sort = (type, catalogData) => {
     }
 }
 
-export const initSortBtns = (catalogData) => {
-    catalogDataSorted.splice(0, catalogDataSorted.length, ...catalogData);
-
+export const initSortBtns = (catalogDataFiltred) => {
+    catalogDataSorted.splice(0, catalogDataSorted.length, ...catalogDataFiltred);
     sortBtns.forEach(elem => {
         elem.addEventListener('click', debounce( (e) => {
-                renderCatalog(sort(e.target.value, catalogData));
+                renderCatalog(sort(e.target.value, catalogDataFiltred));
             })
         );
     });
-}
-
-// OMG 2 ask how to correct later 1000000000%
-export const getCatalogDataSorted = () => {
-  return catalogDataSorted;
-}
-
-export const getSortBtns = () => {
-  return sortBtns;
 }

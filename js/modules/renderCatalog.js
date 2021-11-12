@@ -17,7 +17,7 @@ import {
 } from "./common.js";
 
 
-const catalog = document.querySelector('.results__list');
+export const catalog = document.querySelector('.results__list');
 const renderedCatalogData = [];
 
 const generateCatalogItem = (catalogItemData) => {   
@@ -106,8 +106,3 @@ export const renderCatalog = (catalogData, itemsCount = getCatalogItemsCount(cat
 
     addCatalogEvents(catalog.querySelectorAll('.results__item'), renderedCatalogData);
 };
-
-// correct later
-export const getCatalog = () => {
-    return catalog;
-}

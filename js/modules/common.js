@@ -32,35 +32,33 @@ export const getCatalogItemsCount = (catalogData) => {
 export const adapter = (catalogData) => {
     const catalog = [];
     
-    for (let i = 0; i < catalogData.length; i++) {
-        catalogData.forEach(elem => {
-            catalog.push({
-                id: catalogData.indexOf(elem),
-                title: elem.name,
-                description: elem.description,
-                category: elem.category,
-                price: elem.price,
-                address: {
-                    city: elem.address.city,
-                    street: elem.address.street,
-                    building: elem.address.building,
-                },
-                coordinates: elem.coordinates,
-                seller: {
-                    fullname: elem.seller.fullname,
-                    rating: elem.seller.rating,
-                },
-                publishDate: +elem['publish-date'],
-                photos: elem.photos,
-                filters: {
-                    type: elem.filters.type,
-                    area: elem.filters.area,    
-                    roomsCount: elem.filters['rooms-count'],
-                },
-                favorite: false,
-            })
+    catalogData.forEach(elem => {
+        catalog.push({
+            id: catalogData.indexOf(elem),
+            title: elem.name,
+            description: elem.description,
+            category: elem.category,
+            price: elem.price,
+            address: {
+                city: elem.address.city,
+                street: elem.address.street,
+                building: elem.address.building,
+            },
+            coordinates: elem.coordinates,
+            seller: {
+                fullname: elem.seller.fullname,
+                rating: elem.seller.rating,
+            },
+            publishDate: +elem['publish-date'],
+            photos: elem.photos,
+            filters: {
+                type: elem.filters.type,
+                area: elem.filters.area,    
+                roomsCount: elem.filters['rooms-count'],
+            },
+            favorite: false,
         })
-    }   
+    })
     return catalog;
 }
 

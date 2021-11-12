@@ -1,7 +1,7 @@
 'use strict';
 
 import { renderCatalog } from './renderCatalog.js';
-import { getSortBtns, sort } from './sorting.js';
+import { sortBtns, sort } from './sorting.js';
 import { transformToPrice } from './common.js';
 
 const MIN_PRICE = 100000;
@@ -34,7 +34,7 @@ const checkType = (catalogItemType, house, flat, apartment) => {
     else return true;
 }
 
-// correct
+// correct later
 const checkRoomsCount = (catalogItemRoomsCount, filterRoomsCount) => {
     switch (filterRoomsCount) {
         case 'one':
@@ -125,10 +125,8 @@ export const initFilter = (catalogData, catalogDataFiltred) => {
     
         sort('popular', catalogDataFiltred);
         renderCatalog(catalogDataFiltred);
-        getSortBtns()[0].checked = true;
+        sortBtns[0].checked = true;
     }
-
-
 
     filterSubmitBtn.addEventListener('click', filterCatalogData);
     
@@ -136,7 +134,7 @@ export const initFilter = (catalogData, catalogDataFiltred) => {
 
 
 export const enablefilters = () => {
-    getSortBtns().forEach(elem => {
+    sortBtns.forEach(elem => {
         elem.removeAttribute('disabled');
     });
     filterForm.querySelectorAll('input').forEach(elem => {
@@ -148,7 +146,7 @@ export const enablefilters = () => {
 
 
 export const disablefilters = () => {
-    getSortBtns().forEach(elem => {
+    sortBtns.forEach(elem => {
         elem.setAttribute('disabled', 'disebled');
     })
     filterForm.querySelectorAll('input').forEach(elem => {
@@ -157,18 +155,4 @@ export const disablefilters = () => {
     filterSubmitBtn.setAttribute('disabled', 'disebled');
     mySlider.disabled(true);
 }
-
-// OMG ask how to correct later 1000000000%
-export const getFilterForm = () => {
-    return filterForm;
-}
-
-export const getFilterSubmitBtn = () => {
-    return filterSubmitBtn;
-}
-
-export const getMySlider = () => {
-    return mySlider;
-}
-
 

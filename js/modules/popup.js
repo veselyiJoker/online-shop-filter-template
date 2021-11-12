@@ -7,8 +7,10 @@ import {
     transformToDate,
     transformToPrice 
 } from "./common.js";
+import { initMap } from "./map.js";
 
 const popup = document.querySelector('.popup');
+const popupTeamplate = popup.innerHTML;
 
 let popupCloseBtn;
 let favoriteBtn;
@@ -67,23 +69,22 @@ const transformToType = (type) => {
 const generatePopupChars = (charsData) => {
     const fragment = document.createDocumentFragment();
 
-    fragment.appendChild(generateCharsItem('Площадь', charsData.area));
-    fragment.appendChild(generateCharsItem('Количество комнат', charsData.roomsCount));
-    fragment.appendChild(generateCharsItem('Тип недвижимости', transformToType(charsData.type)));
+    fragment.appendChild(generateCharsItem('Площадь', charsData.area) );
+    fragment.appendChild(generateCharsItem('Количество комнат', charsData.roomsCount) );
+    fragment.appendChild(generateCharsItem('Тип недвижимости', transformToType(charsData.type)) );
 
     return fragment;
 }
 
 
 const generatePopup = (catalogItemData) => {
-
     const newPopupFragment = document.createDocumentFragment();
-    newPopupFragment.appendChild(generateDOMItem(popup.innerHTML));
+
+    newPopupFragment.appendChild(generateDOMItem(popupTeamplate));
 
     const newPopupFavoriteBtn = newPopupFragment.querySelector('.gallery__favourite.fav-add');
     const newPopupGalleryList = newPopupFragment.querySelector('.gallery__list');
-    const newPopupChars = popup.querySelector('.popup__chars');
-    const newPopupAddress = newPopupFragment.querySelector('.popup__address');
+    const newPopupChars = newPopupFragment.querySelector('.popup__chars');
 
     newPopupFragment.querySelector('.popup__date').textContent = transformToDate(catalogItemData.publishDate);
     newPopupFragment.querySelector('.popup__title').textContent = catalogItemData.title;
@@ -92,6 +93,12 @@ const generatePopup = (catalogItemData) => {
     newPopupFragment.querySelector('.seller__rating span').textContent = catalogItemData.seller.rating;
     newPopupFragment.querySelector('.popup__description p').textContent = catalogItemData.description;
     newPopupFragment.querySelector('.gallery__main-pic img').src = catalogItemData.photos[0];  
+
+    newPopupFragment.querySelector('.popup__address').textContent = `
+        ${catalogItemData.address.city ? catalogItemData.address.city : ''},
+        ${catalogItemData.address.street ? catalogItemData.address.street : ''},
+        ${catalogItemData.address.building ? 'Дом ' + catalogItemData.address.building : ''}
+    `;
 
     if (catalogItemData.favorite) {
         newPopupFavoriteBtn.classList.add('fav-add--checked');
@@ -105,27 +112,20 @@ const generatePopup = (catalogItemData) => {
     clearDOMItem(newPopupChars);
     newPopupChars.appendChild(generatePopupChars(catalogItemData.filters));
 
-    newPopupAddress.textContent = `
-        ${catalogItemData.address.city ? catalogItemData.address.city : ''},
-        ${catalogItemData.address.street ? catalogItemData.address.street : ''},
-        ${catalogItemData.address.building ? 'Дом ' + catalogItemData.address.building : ''}
-    `;
-
-    clearDOMItem(popup);
-
     return newPopupFragment;
 }
 
 
 export const renderPopup = (elem, catalogItemData) => {
+    clearDOMItem(popup);
     popup.appendChild(generatePopup(catalogItemData));
     addPopupEvents(elem, catalogItemData);
+    initMap(catalogItemData.coordinates[0], catalogItemData.coordinates[1]);
     popup.classList.add('popup--active');
 }
 
 
 const addPopupEvents = (elem, catalogItemData) => {
-
     popupCloseBtn = popup.querySelector('.popup__close');
     favoriteBtn = popup.querySelector('.gallery__favourite.fav-add');
     popupGalery = popup.querySelector('.popup__gallery');
